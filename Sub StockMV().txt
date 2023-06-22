@@ -1,0 +1,113 @@
+Sub MVStock():
+
+    Dim ws As Worksheet
+    Dim Summary As Integer
+    Dim volume As Double
+    Dim open_price As Double
+    Dim close_price As Double
+    Dim change As Double
+    Dim yearly_change As Double
+    Dim Greatest_increase As Double
+    Dim Greatest_decrease As Double
+    Dim Greatest_volume As Double
+    Dim lastrow As Long
+    Dim Greatest_increase_ticker As String
+    Dim Greatest_volume_ticker As String
+    Dim Greatest_decrease_ticker As String
+    
+    
+
+For Each ws In ThisWorkbook.Sheets
+        ws.Activate
+    
+ws.Range("I1") = "Ticker"
+ws.Range("J1") = "Yearly Change"
+ws.Range("K1") = "Percent Change"
+ws.Range("L1") = "Total Stock Volume"
+ws.Range("O1") = "Ticker"
+ws.Range("P1") = "Value"
+ws.Range("N2") = "Greatest % Increase"
+ws.Range("N3") = "Greatest % Decrease"
+ws.Range("N4") = "Greatest Total Volume"
+
+
+' Make sure it runs to the last row in the sheet
+
+lastrow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    volume = 0
+    Summary = 2
+    open_price = 0
+    close_price = 0
+    change = 0
+    
+    
+'Start the loop 1
+For i = 2 To lastrow
+
+    volume = volume + ws.Cells(i, 7).Value
+    close_price = ws.Cells(i, 6).Value
+
+If open_price = 0 Then
+open_price = ws.Cells(i, 3).Value
+End If
+    
+    If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then
+    ws.Cells(Summary, 9).Value = ws.Cells(i, 1).Value
+    ws.Cells(Summary, 12).Value = volume
+    yearly_change = close_price - open_price
+    ws.Cells(Summary, 10) = yearly_change
+    change = (ws.Cells(Summary, 10) / open_price) * 100
+    ws.Cells(Summary, 11) = change
+    
+'Format cells with specific colors
+    If ws.Cells(Summary, 10).Value < 0 Then
+     ws.Cells(Summary, 10).Interior.ColorIndex = 3
+     
+    ElseIf ws.Cells(Summary, 10).Value > 0 Then
+     ws.Cells(Summary, 10).Interior.ColorIndex = 4
+    
+    End If
+
+    Summary = Summary + 1
+    volume = 0
+    open_price = 0
+    change = 0
+   
+    End If
+   
+    Next i
+    
+'Find the information to complete the last summary: find the values
+
+        Greatest_increase = WorksheetFunction.Max(ws.Range("K2:K" & lastrow))
+        ws.Range("P2").Value = Greatest_increase
+        
+        
+        Greatest_decrease = WorksheetFunction.Min(ws.Range("K2:K" & lastrow))
+        ws.Range("P3").Value = Greatest_decrease
+        
+        
+        Greatest_volume = WorksheetFunction.Max(ws.Range("L2:L" & lastrow))
+        ws.Range("P4").Value = Greatest_volume
+    
+    
+   
+'Find the information to complete the last summary: find the ticker name
+
+For i = 2 To lastrow
+            If ws.Cells(i, 11).Value = Greatest_increase Then
+                Greatest_increase_ticker = ws.Cells(i, 9).Value
+            ElseIf ws.Cells(i, 11).Value = Greatest_decrease Then
+                Greatest_decrease_ticker = ws.Cells(i, 9).Value
+            ElseIf ws.Cells(i, 12).Value = Greatest_volume Then
+                Greatest_volume_ticker = ws.Cells(i, 9).Value
+            End If
+        Next i
+        
+        ws.Range("O2").Value = Greatest_increase_ticker
+        ws.Range("O3").Value = Greatest_decrease_ticker
+        ws.Range("O4").Value = Greatest_volume_ticker
+    Next ws
+End Sub
+
